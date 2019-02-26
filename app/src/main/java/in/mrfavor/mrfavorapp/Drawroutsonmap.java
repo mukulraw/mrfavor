@@ -167,7 +167,7 @@ public class Drawroutsonmap extends AppCompatActivity implements OnMapReadyCallb
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.drawable.resize_iclogo);
-        SharedPreferences pref = getSharedPreferences("Logininfo", Context.MODE_PRIVATE);
+        final SharedPreferences pref = getSharedPreferences("Logininfo", Context.MODE_PRIVATE);
         userid = pref.getString("useremail", null);
         cartype = "Micro";
         car1 = (ImageView) findViewById(R.id.ivCar1);
@@ -277,9 +277,68 @@ public class Drawroutsonmap extends AppCompatActivity implements OnMapReadyCallb
                                 pm = "Wallet";
                             }
 
-                            dialog.dismiss();
-                            km = totalkm + "";
-                            new SendPostRequest(userid, ""+pick_lat, ""+pick_lng, ""+pick, ""+drop_lat, ""+drop_lng, drop, km).execute();
+                            if (pm.equals("Wallet"))
+                            {
+
+                                userid = pref.getString("useremail", null);
+
+
+                                String url = "http://mrfavor.in/myfavour/wallet_balance.php";
+                                StringRequest MyStringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                                    @Override
+                                    public void onResponse(String response) {
+
+                                        if (response.length() > 0)
+                                        {
+                                            if (Integer.parseInt(response) > 350)
+                                            {
+
+                                                dialog.dismiss();
+                                                km = totalkm + "";
+                                                new SendPostRequest(userid, ""+pick_lat, ""+pick_lng, ""+pick, ""+drop_lat, ""+drop_lng, drop, km).execute();
+
+                                            }
+                                            else
+                                            {
+                                                Toast.makeText(Drawroutsonmap.this, "Wallet amount must be minimum \u20B9 350", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Toast.makeText(Drawroutsonmap.this, "Wallet amount must be minimum \u20B9 350", Toast.LENGTH_SHORT).show();
+                                        }
+
+
+
+                                        //Toast.makeText(getApplicationContext(), "Response" + response, Toast.LENGTH_SHORT).show();
+                                        //This code is executed if the server responds, whether or not the response contains data.
+                                        //The String 'response' contains the server's response.
+                                    }
+                                }, new Response.ErrorListener() { //Create an error listener to handle errors appropriately.
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        //This code is executed if there is an error.
+                                    }
+                                }) {
+                                    protected Map<String, String> getParams() {
+                                        Map<String, String> MyData = new HashMap<String, String>();
+                                        MyData.put("emailid", userid); //Add the data you'd like to send to the server.
+                                        //Add the data you'd like to send to the server.
+                                        return MyData;
+                                    }
+                                };
+                                RequestQueue MyRequestQueue = Volley.newRequestQueue(Drawroutsonmap.this);
+                                MyRequestQueue.add(MyStringRequest);
+
+                            }
+                            else
+                            {
+
+                                dialog.dismiss();
+                                km = totalkm + "";
+                                new SendPostRequest(userid, ""+pick_lat, ""+pick_lng, ""+pick, ""+drop_lat, ""+drop_lng, drop, km).execute();
+
+                            }
 
                         }
                         else
